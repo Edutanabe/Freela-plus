@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>Freela+</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eef0f3;color:#111827;font-family:Arial,sans-serif}
+.app{max-width:540px;margin:auto;min-height:100vh;background:#fff}
+header{background:#111827;color:#fff;padding:20px 16px 14px;position:sticky;top:0;z-index:5}
+.headerrow{display:flex;justify-content:space-between;align-items:center}.brand{font-size:25px;font-weight:800}.sub{font-size:12px;opacity:.7}
+nav{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:15px}nav button{background:#374151;color:#fff;border:0;border-radius:10px;padding:9px 4px;font-weight:700}nav button.on{background:#fff;color:#111827}
+main{padding:15px}.page{display:none}.page.on{display:block}.date{font-size:20px;font-weight:800}.muted{font-size:12px;color:#6b7280;margin-top:4px}
+.card{border:1px solid #e5e7eb;border-radius:16px;padding:13px;margin:10px 0;box-shadow:0 2px 9px #0000000a}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.name{font-weight:800;font-size:17px}.value{font-weight:800}.rule{font-size:11px;color:#6b7280;margin-top:4px}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:11px}.actions button{font-size:11px;padding:10px 3px;border:1px solid #d1d5db;background:#fff;border-radius:10px;font-weight:700}.actions button.on{background:#111827;color:#fff}
+.total{display:flex;justify-content:space-between;background:#f3f4f6;padding:15px;border-radius:15px;font-weight:800;font-size:17px;margin-top:14px}
+.primary{width:100%;border:0;background:#111827;color:#fff;border-radius:12px;padding:13px;font-weight:800;margin:8px 0}.secondary{width:100%;border:1px solid #d1d5db;background:#fff;border-radius:12px;padding:12px;font-weight:800;margin:6px 0}
+.item{display:flex;justify-content:space-between;gap:8px;align-items:center;border:1px solid #e5e7eb;border-radius:13px;padding:12px;margin:8px 0}.danger{color:#b91c1c;border:1px solid #fecaca;background:#fff1f2;border-radius:9px;padding:8px}
+select,input{width:100%;padding:11px;border:1px solid #d1d5db;border-radius:10px;margin:5px 0 10px;background:#fff}.section{font-weight:800;margin:18px 0 8px}
+.badge{font-size:11px;padding:5px 7px;border-radius:8px;background:#eef2ff}.empty{text-align:center;color:#6b7280;padding:25px}
+@media print{header,nav,.no-print{display:none!important}.page{display:none!important}#closePage{display:block!important}.app{max-width:none}.card{break-inside:avoid}}
+</style>
+</head>
+<body><div class="app">
+<header>
+ <div class="headerrow"><div><div class="brand">Freela+</div><div class="sub">Controle diário de freelancers</div></div><div id="bell">🔔</div></div>
+ <nav><button id="nToday" class="on" onclick="showPage('today')">Hoje</button><button id="nClose" onclick="showPage('close')">Fechamento</button><button id="nPeople" onclick="showPage('people')">Freelancers</button></nav>
+</header>
+<main>
+<section id="today" class="page on">
+ <div class="date" id="todayTitle"></div><div class="muted" id="weekTitle"></div>
+ <div id="todayList"></div>
+ <button class="primary" onclick="addPerson()">＋ Adicionar freelancer</button>
+ <div class="total"><span>Total de hoje</span><span id="todayTotal">R$ 0,00</span></div>
+ <div class="muted no-print">🔔 Lembrete diário configurado para 19h quando permitido pelo aparelho.</div>
+</section>
+
+<section id="close" class="page">
+ <div class="date">Fechamento da semana</div><div class="muted" id="closeWeek"></div>
+ <div id="closeList"></div><div class="total"><span>Total geral</span><span id="grandTotal">R$ 0,00</span></div>
+ <button class="primary no-print" onclick="savePDF()">📄 Salvar PDF</button>
+ <button class="secondary no-print" onclick="previousWeek()">‹ Semana anterior</button>
+ <button class="secondary no-print" onclick="currentWeek()">Semana atual</button>
+ <button class="secondary no-print" onclick="nextWeek()">Próxima semana ›</button>
+</section>
+
+<section id="people" class="page">
+ <div class="date">Freelancers</div><div class="muted">Cadastre a regra de pagamento de cada pessoa.</div>
+ <button class="primary" onclick="addPerson()">＋ Adicionar freelancer</button>
+ <div id="peopleList"></div>
+ <div class="section">Feriados de Mogi das Cruzes — 2026</div>
+ <div id="holidayList"></div>
+</section>
+</main></div>
+<script>
+const KEY='freela_plus_complete_v1';
+const holidays={
+ '2026-01-01':'Confraternização Universal','2026-01-25':'Aniversário de São Paulo',
+ '2026-04-03':'Paixão de Cristo','2026-04-21':'Tiradentes','2026-05-01':'Dia do Trabalho',
+ '2026-06-04':'Corpus Christi','2026-07-09':'Revolução Constitucionalista',
+ '2026-07-26':'Nossa Senhora Sant’Ana (Mogi das Cruzes)','2026-09-01':'Aniversário de Mogi das Cruzes',
+ '2026-10-12':'Nossa Senhora Aparecida','2026-11-02':'Finados','2026-11-15':'Proclamação da República',
+ '2026-11-20':'Consciência Negra','2026-12-25':'Natal'
+};
+let db=JSON.parse(localStorage.getItem(KEY)||'null');
+if(!db) db={people:[],days:{},weeks:{}};
+function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+function money(v){return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+function dateFrom(s){let [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
+function monday(d){let x=new Date(d);let n=(x.getDay()+6)%7;x.setDate(x.getDate()-n);x.setHours(0,0,0,0);return x}
+function fmt(d){return d.toLocaleDateString('pt-BR')}
+function weekKeys(base){let m=monday(base),a=[];for(let i=0;i<7;i++){let x=new Date(m);x.setDate(m.getDate()+i);a.push(iso(x))}return a}
+function isHoliday(k){return !!holidays[k]}
+function rate(p,k){let d=dateFrom(k), weekend=d.getDay()===0||d.getDay()===6;return (p.rule==='150'||weekend||isHoliday(k))?150:120}
+function status(k,id){return (db.days[k]||{})[id]||'none'}
+function setStatus(k,id,st){db.days[k]=db.days[k]||{};db.days[k][id]=st;save();renderAll()}
+function statusValue(st,r){return st==='full'?r:st==='half'?r/2:0}
+function addPerson(){
+ let name=prompt('Nome do freelancer:'); if(!name||!name.trim())return;
+ let rule=confirm('Este freelancer recebe R$ 150 todos os dias?\n\nOK = R$ 150 todos os dias\nCancelar = R$ 120 seg–sex / R$ 150 sáb, dom e feriados');
+ db.people.push({id:Date.now(),name:name.trim(),rule:rule?'150':'normal'});save();renderAll();
+}
+function deletePerson(id){
+ let p=db.people.find(x=>x.id===id);if(!p)return;
+ if(!confirm('Excluir freelancer?\n\nTem certeza que deseja excluir '+p.name+'?\n\nOs registros desse freelancer serão removidos.'))return;
+ db.people=db.people.filter(x=>x.id!==id);
+ Object.keys(db.days).forEach(k=>{if(db.days[k])delete db.days[k][id]});save();renderAll();
+}
+function showPage(id){document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));document.getElementById(id).classList.add('on');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));document.getElementById({today:'nToday',close:'nClose',people:'nPeople'}[id]).classList.add('on');renderAll()}
+function renderToday(){
+ let now=new Date(),k=iso(now),m=monday(now),s=new Date(m);s.setDate(m.getDate()+6);
+ document.getElementById('todayTitle').textContent=now.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+ document.getElementById('weekTitle').textContent='Semana: '+fmt(m)+' a '+fmt(s)+(isHoliday(k)?' • 🎉 '+holidays[k]:'');
+ let html='',total=0;
+ db.people.forEach(p=>{let st=status(k,p.id),r=rate(p,k),v=statusValue(st,r);total+=v;
+ html+=`<div class="card"><div class="row"><div><div class="name">${p.name}</div><div class="rule">${p.rule==='150'?'R$ 150 todos os dias':'R$ 120 seg–sex / R$ 150 sáb, dom e feriados'}</div></div><div class="value">${money(v)}</div></div>
+ <div class="actions"><button class="${st==='none'?'on':''}" onclick="setStatus('${k}',${p.id},'none')">Não trabalhou</button><button class="${st==='half'?'on':''}" onclick="setStatus('${k}',${p.id},'half')">Meio período</button><button class="${st==='full'?'on':''}" onclick="setStatus('${k}',${p.id},'full')">Integral</button></div></div>`});
+ document.getElementById('todayList').innerHTML=html||'<div class="empty">Nenhum freelancer cadastrado.</div>';document.getElementById('todayTotal').textContent=money(total);
+}
+let viewedMonday=monday(new Date());
+function renderClose(){
+ let keys=weekKeys(viewedMonday),total=0,html='';
+ document.getElementById('closeWeek').textContent=fmt(dateFrom(keys[0]))+' a '+fmt(dateFrom(keys[6]));
+ db.people.forEach(p=>{let sum=0,full=0,half=0,worked=0;keys.forEach(k=>{let st=status(k,p.id),v=statusValue(st,rate(p,k));sum+=v;if(st==='full'){full++;worked++}if(st==='half'){half++;worked++}});
+ total+=sum;html+=`<div class="card"><div class="row"><div><div class="name">${p.name}</div><div class="rule">${worked} dia(s) • ${full} integral • ${half} meio período</div></div><div class="value">${money(sum)}</div></div></div>`});
+ document.getElementById('closeList').innerHTML=html||'<div class="empty">Nenhum freelancer cadastrado.</div>';document.getElementById('grandTotal').textContent=money(total);
+}
+function renderPeople(){
+ let h='';db.people.forEach(p=>h+=`<div class="item"><div><b>${p.name}</b><div class="rule">${p.rule==='150'?'R$ 150 todos os dias':'R$ 120 seg–sex / R$ 150 sáb, dom e feriados'}</div></div><button class="danger" onclick="deletePerson(${p.id})">🗑️ Deletar</button></div>`);
+ document.getElementById('peopleList').innerHTML=h||'<div class="empty">Nenhum freelancer cadastrado.</div>';
+ document.getElementById('holidayList').innerHTML=Object.entries(holidays).map(([k,v])=>`<div class="item"><div><b>${fmt(dateFrom(k))}</b><div class="rule">${v}</div></div><span class="badge">R$ 150</span></div>`).join('');
+}
+function renderAll(){renderToday();renderClose();renderPeople()}
+function previousWeek(){viewedMonday.setDate(viewedMonday.getDate()-7);renderClose()}
+function nextWeek(){viewedMonday.setDate(viewedMonday.getDate()+7);renderClose()}
+function currentWeek(){viewedMonday=monday(new Date());renderClose()}
+function savePDF(){window.print()}
+function requestNotification(){
+ if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
+}
+if('Notification' in window&&Notification.permission==='granted'){
+ // Browser notifications require the page/service worker to remain active; this is a best-effort reminder.
+}
+renderAll();requestNotification();
+</script></body></html>
