@@ -1,27 +1,113 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#111827"><title>Freela+</title><style>
-*{box-sizing:border-box}body{margin:0;background:#f3f5f8;color:#18202a;font-family:Arial,sans-serif}.app{max-width:560px;margin:auto;min-height:100vh;padding-bottom:82px}.top{background:#111827;color:#fff;padding:22px 18px 18px;border-radius:0 0 22px 22px}.top .title{font-size:26px;font-weight:800}.top .sub{opacity:.75;margin-top:4px}.content{padding:14px}.card{background:#fff;border-radius:16px;padding:15px;margin-bottom:12px;box-shadow:0 2px 10px #0000000d}.dateRow{display:flex;justify-content:space-between;align-items:center;gap:8px}.date{font-size:21px;font-weight:800}.muted{color:#667085;font-size:13px}.btn{border:0;border-radius:12px;padding:12px 14px;font-weight:700;background:#2563eb;color:#fff;cursor:pointer}.btn.secondary{background:#eef2f6;color:#17202a}.btn.danger{background:#dc2626}.btn.green{background:#16a34a}.btn.full{width:100%}.person{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid #edf0f3}.person:last-child{border-bottom:0}.name{font-weight:800}.type{font-size:11px;color:#667085;margin-top:3px}.status{border:0;border-radius:12px;padding:10px 11px;font-weight:700;min-width:135px;background:#f1f5f9}.status.full{background:#dcfce7;color:#166534}.status.half{background:#fef3c7;color:#92400e}.status.off{background:#f1f5f9;color:#667085}.fab{position:fixed;right:max(18px,calc((100vw - 560px)/2 + 18px));bottom:78px;width:56px;height:56px;border-radius:50%;font-size:28px;padding:0;box-shadow:0 5px 18px #0003}.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e7eb;display:flex;justify-content:center;z-index:5}.navin{max-width:560px;width:100%;display:flex}.nav button{flex:1;border:0;background:#fff;padding:12px 4px 10px;color:#667085;font-size:12px}.nav button.active{color:#2563eb;font-weight:800}.nav .ico{display:block;font-size:20px;margin-bottom:2px}.hidden{display:none}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{background:#f8fafc;border-radius:12px;padding:12px}.metric b{font-size:20px}.select{width:100%;padding:12px;border:1px solid #d5dae0;border-radius:10px;background:#fff;font:inherit}.listrow{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee}.listrow:last-child{border:0}.tag{font-size:11px;padding:5px 8px;border-radius:20px;background:#eef2ff}.total{font-size:27px;font-weight:900}.empty{text-align:center;color:#667085;padding:30px 10px}.modal{position:fixed;inset:0;background:#0007;display:flex;align-items:flex-end;justify-content:center;z-index:10}.sheet{background:#fff;width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:20px}.sheet h3{margin:0 0 15px}.sheet button{width:100%;margin-top:8px}.notice{padding:10px 12px;border-radius:10px;background:#fff7ed;color:#9a3412;font-size:12px;margin-bottom:10px}.historyItem{cursor:pointer}.printOnly{display:none}@media(min-width:561px){.nav{left:50%;right:auto;transform:translateX(-50%);width:560px}.fab{position:fixed}}
-</style></head><body><div class="app"><header class="top"><div class="title">Freela+</div><div class="sub">Controle diário de freelancers</div></header><main class="content">
-<section id="daily"><div class="card"><div class="dateRow"><button class="btn secondary" onclick="moveDay(-1)">‹</button><div style="text-align:center"><div id="dayName" class="muted"></div><div id="dayDate" class="date"></div></div><button class="btn secondary" onclick="moveDay(1)">›</button></div><div id="holidayNotice" style="margin-top:10px"></div></div><div class="card"><div class="dateRow"><div><b>Registro do dia</b><div class="muted">Toque no status para alterar</div></div><button class="btn secondary" onclick="goToday()">Hoje</button></div><div id="dailyList"></div></div><button class="btn green full" onclick="showTab('summary')">Ver fechamento da semana</button></section>
-<section id="summary" class="hidden"><div class="card"><div class="dateRow"><div><b>Fechamento da semana</b><div id="weekRange" class="muted"></div></div><button class="btn" onclick="savePDF()">📄 Salvar PDF</button></div></div><div id="summaryList"></div></section>
-<section id="peopleTab" class="hidden"><div class="card"><b>Freelancers</b><div class="muted" style="margin-top:4px">Escolha a forma de pagamento no cadastro.</div><div id="peopleList"></div></div></section>
-<section id="history" class="hidden"><div class="card"><b>Histórico</b><div class="muted">Semanas já registradas</div><div id="historyList"></div></div></section>
-</main><button class="btn fab" onclick="addPerson()">＋</button><nav class="nav"><div class="navin"><button id="navDaily" class="active" onclick="showTab('daily')"><span class="ico">📅</span>Hoje</button><button id="navSummary" onclick="showTab('summary')"><span class="ico">💰</span>Fechamento</button><button id="navPeople" onclick="showTab('peopleTab')"><span class="ico">👥</span>Freelancers</button><button id="navHistory" onclick="showTab('history')"><span class="ico">📚</span>Histórico</button></div></nav></div><div id="modal"></div>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Freela+</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f6f8;color:#172033;font-family:Arial,sans-serif}
+.app{max-width:720px;margin:auto;min-height:100vh;padding-bottom:90px}.top{background:#172033;color:#fff;padding:20px 18px 16px;position:sticky;top:0;z-index:5}
+.top h1{margin:0;font-size:24px}.top p{margin:5px 0 0;opacity:.8;font-size:14px}
+main{padding:14px}.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 12px #00000012}
+h2{margin:0 0 12px;font-size:18px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button,input,textarea,select{font:inherit;border-radius:10px;border:1px solid #d0d5dd;padding:10px}
+button{border:0;background:#246bfe;color:#fff;cursor:pointer}.secondary{background:#eef2f6;color:#172033}.danger{background:#d92d20}
+.day{font-size:18px;font-weight:bold}.muted{color:#667085;font-size:13px}.person{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid #eee}
+.person:last-child{border-bottom:0}.name{font-weight:700}.amount{font-weight:700}.status{font-size:12px;padding:5px 8px;border-radius:99px;background:#eef2ff;margin-left:7px}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;display:flex;justify-content:center;z-index:10}.bottom-inner{max-width:720px;width:100%;display:grid;grid-template-columns:repeat(5,1fr)}
+.nav{background:#fff;color:#667085;border-radius:0;padding:9px 2px;font-size:11px}.nav.active{color:#246bfe;font-weight:bold}
+.hidden{display:none}.total{font-size:24px;font-weight:800}.modal{position:fixed;inset:0;background:#0008;display:none;align-items:flex-end;z-index:20}.modal.open{display:flex}.sheet{background:#fff;width:100%;max-width:720px;margin:auto;border-radius:18px 18px 0 0;padding:20px}.sheet h3{margin-top:0}.field{margin:10px 0}.field label{display:block;font-size:13px;margin-bottom:5px;color:#667085}.field input,.field textarea,.field select{width:100%}
+.weekrow{display:flex;justify-content:space-between;align-items:center}.smallbtn{padding:8px 10px}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><h1>Freela+</h1><p id="subtitle">Registro diário</p></header>
+<main>
+<section id="today">
+<div class="card">
+<div class="weekrow"><button class="secondary smallbtn" onclick="shiftDay(-1)">‹</button><div style="text-align:center"><div class="day" id="dateTitle"></div><div class="muted" id="weekTitle"></div></div><button class="secondary smallbtn" onclick="shiftDay(1)">›</button></div>
+</div>
+<div class="card"><h2>Registros de hoje</h2><div id="dailyList"></div></div>
+</section>
+
+<section id="closing" class="hidden">
+<div class="card"><div class="weekrow"><button class="secondary smallbtn" onclick="shiftWeek(-7)">‹</button><div style="text-align:center"><h2 style="margin:0">Fechamento</h2><div class="muted" id="closingWeek"></div></div><button class="secondary smallbtn" onclick="shiftWeek(7)">›</button></div></div>
+<div class="card"><div id="closingList"></div><div style="border-top:1px solid #eee;padding-top:14px;margin-top:8px"><div class="muted">Total geral</div><div class="total" id="grandTotal"></div></div></div>
+</section>
+
+<section id="peopleTab" class="hidden">
+<div class="card"><div class="row" style="justify-content:space-between"><h2>Freelancers</h2><button onclick="addPerson()">＋ Adicionar</button></div><div id="peopleList"></div></div>
+</section>
+
+<section id="holidays" class="hidden">
+<div class="card"><div class="row" style="justify-content:space-between"><h2>Feriados</h2><button onclick="addHoliday()">＋ Adicionar</button></div><p class="muted">Feriados de Mogi das Cruzes já cadastrados para 2026 a 2030.</p><div id="holidayList"></div></div>
+</section>
+
+<section id="history" class="hidden">
+<div class="card"><h2>Histórico</h2><div id="historyList"></div></div>
+</section>
+</main>
+<nav class="bottom"><div class="bottom-inner">
+<button class="nav active" onclick="showTab('today',this)">📅<br>Hoje</button>
+<button class="nav" onclick="showTab('closing',this)">💰<br>Fechamento</button>
+<button class="nav" onclick="showTab('peopleTab',this)">👥<br>Freelancers</button>
+<button class="nav" onclick="showTab('holidays',this)">🎉<br>Feriados</button>
+<button class="nav" onclick="showTab('history',this)">📚<br>Histórico</button>
+</div></nav>
+</div>
+
+<div class="modal" id="modal"><div class="sheet">
+<h3 id="modalTitle"></h3><div id="modalBody"></div><div class="row" style="justify-content:flex-end;margin-top:15px"><button class="secondary" onclick="closeModal()">Cancelar</button><button onclick="saveModal()">Salvar</button></div>
+</div></div>
+
 <script>
-const KEY='freelaPlusDailyV1';const defaultHolidays={'2026-01-01':'Confraternização Universal','2026-04-03':'Sexta-feira Santa','2026-04-21':'Tiradentes','2026-05-01':'Dia do Trabalho','2026-06-04':'Corpus Christi','2026-07-09':'Revolução Constitucionalista','2026-07-26':'Nossa Senhora de Sant’Ana','2026-09-01':'Aniversário de Mogi das Cruzes','2026-09-07':'Independência do Brasil','2026-10-12':'Nossa Senhora Aparecida','2026-11-02':'Finados','2026-11-15':'Proclamação da República','2026-11-20':'Consciência Negra','2026-12-25':'Natal'};
-let data;try{data=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){data=null}if(!data)data={people:[],records:{},holidays:defaultHolidays};data.people=Array.isArray(data.people)?data.people:[];data.records=data.records||{};data.holidays=data.holidays||defaultHolidays;let current=new Date();current.setHours(12,0,0,0);
-function save(){localStorage.setItem(KEY,JSON.stringify(data))}function iso(d){return new Date(d).toISOString().slice(0,10)}function parse(s){return new Date(s+'T12:00:00')}function monday(d){let x=new Date(d);let n=x.getDay();x.setDate(x.getDate()-(n===0?6:n-1));return x}function fmt(d){return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}function dayName(d){return d.toLocaleDateString('pt-BR',{weekday:'long'})}function money(v){return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}function rate(p,d,state){if(state==='off')return 0;let base=p.rate150?150:((d.getDay()===0||d.getDay()===6||data.holidays[iso(d)])?150:120);return state==='half'?base/2:base}function get(p,d){return data.records[p.id+'_'+iso(d)]||'off'}function set(p,d,s){let k=p.id+'_'+iso(d);if(s==='off')delete data.records[k];else data.records[k]=s;save();render()}
-function addPerson(){let n=prompt('Nome do freelancer:');if(!n||!n.trim())return;let choice=prompt('Forma de pagamento:\n1 - Normal (R$ 120 seg-sex / R$ 150 sáb-dom-feriado)\n2 - R$ 150 todos os dias','1');if(choice!=='1'&&choice!=='2')return alert('Cadastro cancelado. Escolha 1 ou 2.');data.people.push({id:'p'+Date.now()+Math.random().toString(36).slice(2),name:n.trim(),rate150:choice==='2'});save();render();showTab('peopleTab')}
-function removePerson(id){let p=data.people.find(x=>x.id===id);if(!p)return;if(!confirm('Excluir freelancer?\n\nTem certeza que deseja excluir '+p.name+'?\n\nOs registros desse freelancer também serão apagados.'))return;data.people=data.people.filter(x=>x.id!==id);Object.keys(data.records).forEach(k=>{if(k.startsWith(id+'_'))delete data.records[k]});save();render()}
-function moveDay(n){current.setDate(current.getDate()+n);render()}function goToday(){current=new Date();current.setHours(12,0,0,0);render()}
-function render(){renderDaily();renderSummary();renderPeople();renderHistory()}
-function renderDaily(){document.getElementById('dayName').textContent=dayName(current);document.getElementById('dayDate').textContent=current.toLocaleDateString('pt-BR');let h=data.holidays[iso(current)];document.getElementById('holidayNotice').innerHTML=h?'<div class="notice">🎉 Feriado: '+h+' — trabalho integral paga R$ 150 (ou R$ 150 no tipo todos os dias).</div>':'';let el=document.getElementById('dailyList');if(!data.people.length){el.innerHTML='<div class="empty">Nenhum freelancer cadastrado.<br><br>Toque no botão ＋ para adicionar.</div>';return}el.innerHTML=data.people.map(p=>{let s=get(p,current),label=s==='full'?'Integral':s==='half'?'Meio período':'Não trabalhou';return '<div class="person"><div><div class="name">'+p.name+'</div><div class="type">'+(p.rate150?'R$ 150 todos os dias':'R$ 120 seg-sex / R$ 150 sáb-dom-feriado')+'</div></div><button class="status '+s+'" onclick="cycle(\''+p.id+'\')">'+label+'</button></div>'}).join('')}
-function cycle(id){let p=data.people.find(x=>x.id===id),s=get(p,current);set(p,current,s==='off'?'half':s==='half'?'full':'off')}
-function weekDates(ref){let s=monday(ref);return Array.from({length:7},(_,i)=>{let d=new Date(s);d.setDate(s.getDate()+i);return d})}function personTotal(p,ds){return ds.reduce((a,d)=>a+rate(p,d,get(p,d)),0)}function weekTotal(ds){return data.people.reduce((a,p)=>a+personTotal(p,ds),0)}
-function renderSummary(){let ds=weekDates(current);document.getElementById('weekRange').textContent=fmt(ds[0])+' a '+fmt(ds[6]);let el=document.getElementById('summaryList');if(!data.people.length){el.innerHTML='<div class="card empty">Nenhum freelancer cadastrado.</div>';return}el.innerHTML=data.people.map(p=>{let total=personTotal(p,ds),full=ds.filter(d=>get(p,d)==='full').length,half=ds.filter(d=>get(p,d)==='half').length;return '<div class="card"><div class="dateRow"><div><b>'+p.name+'</b><div class="muted">'+full+' integral · '+half+' meio período</div></div><div class="total">'+money(total)+'</div></div></div>'}).join('')+'<div class="card"><div class="muted">TOTAL GERAL</div><div class="total">'+money(weekTotal(ds))+'</div></div>'}
-function renderPeople(){document.getElementById('peopleList').innerHTML=data.people.length?data.people.map(p=>'<div class="listrow"><div><b>'+p.name+'</b><div class="muted">'+(p.rate150?'R$ 150 todos os dias':'R$ 120 seg-sex / R$ 150 sáb-dom-feriado')+'</div></div><button class="btn danger" onclick="removePerson(\''+p.id+'\')">Excluir</button></div>').join(''):'<div class="empty">Nenhum freelancer.</div>'}
-function renderHistory(){let el=document.getElementById('historyList'),weeks={};Object.keys(data.records).forEach(k=>{let d=k.split('_').pop();let m=iso(monday(parse(d)));weeks[m]=true});let arr=Object.keys(weeks).sort().reverse();el.innerHTML=arr.length?arr.map(w=>{let ds=weekDates(parse(w));return '<div class="listrow historyItem" onclick="current=parse(\''+w+'\');showTab(\'summary\');render()"><div><b>Semana '+fmt(ds[0])+' a '+fmt(ds[6])+'</b><div class="muted">Total: '+money(weekTotal(ds))+'</div></div><span>›</span></div>'}).join(''):'<div class="empty">Ainda não há semanas no histórico.</div>'}
-function showTab(t){['daily','summary','peopleTab','history'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==t));['Daily','Summary','People','History'].forEach(x=>{let b=document.getElementById('nav'+x);if(b)b.classList.remove('active')});let map={daily:'navDaily',summary:'navSummary',peopleTab:'navPeople',history:'navHistory'};document.getElementById(map[t]).classList.add('active');render()}
-function pdfEsc(s){return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\x7E]/g,'').replace(/[\\()]/g,'\\$&')}
-function savePDF(){let ds=weekDates(current),lines=['FECHAMENTO DE FREELANCERS','Semana: '+fmt(ds[0])+' a '+fmt(ds[6]),''];data.people.forEach(p=>{let full=ds.filter(d=>get(p,d)==='full').length,half=ds.filter(d=>get(p,d)==='half').length;lines.push(p.name+' - '+full+' integral(is), '+half+' meio periodo(s) - '+money(personTotal(p,ds)))});lines.push('','TOTAL GERAL: '+money(weekTotal(ds)));let stream='BT\n/F1 16 Tf\n42 800 Td\n';lines.forEach((l,i)=>{if(i===1)stream+='/F1 11 Tf\n';stream+='('+pdfEsc(l)+') Tj\n0 -18 Td\n'});stream+='ET';let objs=['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>','<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>','<< /Length '+stream.length+' >>\nstream\n'+stream+'\nendstream'];let pdf='%PDF-1.4\n',off=[0];objs.forEach((o,i)=>{off.push(pdf.length);pdf+=(i+1)+' 0 obj\n'+o+'\nendobj\n'});let x=pdf.length;pdf+='xref\n0 6\n0000000000 65535 f \n';for(let i=1;i<off.length;i++)pdf+=String(off[i]).padStart(10,'0')+' 00000 n \n';pdf+='trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+x+'\n%%EOF';let a=document.createElement('a'),blob=new Blob([pdf],{type:'application/pdf'});a.href=URL.createObjectURL(blob);a.download='Fechamento_Freelancers_'+iso(ds[0])+'_a_'+iso(ds[6])+'.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+const KEY='freelaPlusFinalV2';
+const names=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+function easter(y){let a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return new Date(y,mo-1,da)}
+function addDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
+function key(d){return new Date(d).toISOString().slice(0,10)}
+function monday(d){let x=new Date(d),n=x.getDay();x.setDate(x.getDate()-(n===0?6:n-1));x.setHours(12,0,0,0);return x}
+function fmt(d){return new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})}
+function money(v){return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+let holidays={};
+for(let y=2026;y<=2030;y++){
+ const e=easter(y);
+ [[`${y}-01-01`,'Confraternização Universal'],[key(addDays(e,-2)),'Sexta-feira Santa'],[`${y}-04-21`,'Tiradentes'],[`${y}-05-01`,'Dia do Trabalho'],[key(addDays(e,60)),'Corpus Christi'],[`${y}-07-09`,'Data Magna de São Paulo'],[`${y}-07-26`,'Nossa Senhora de Sant’Ana'],[`${y}-09-01`,'Aniversário de Mogi das Cruzes'],[`${y}-09-07`,'Independência do Brasil'],[`${y}-10-12`,'Nossa Senhora Aparecida'],[`${y}-11-02`,'Finados'],[`${y}-11-15`,'Proclamação da República'],[`${y}-11-20`,'Consciência Negra'],[`${y}-12-25`,'Natal']].forEach(([d,n])=>holidays[d]=n);
+}
+let data=JSON.parse(localStorage.getItem(KEY)||'null')||{people:[],records:{},adjust:{},holidays:{}};
+Object.keys(holidays).forEach(k=>{if(!data.holidays[k])data.holidays[k]=holidays[k]});
+if(!data.people.length)data.people=[{id:'p1',name:'Freelancer 1',rate150:false}];
+let selectedDate=new Date(); let closingDate=monday(new Date()); let modalState=null;
+function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+function getRec(pid,d){return data.records[pid+'_'+key(d)]||'off'}
+function setRec(pid,d,v){let k=pid+'_'+key(d);if(v==='off')delete data.records[k];else data.records[k]=v;save();render()}
+function baseRate(p,d){let weekend=d.getDay()===0||d.getDay()===6||data.holidays[key(d)];return p.rate150?150:(weekend?150:120)}
+function amount(p,d){let s=getRec(p.id,d);return s==='full'?baseRate(p,d):s==='half'?baseRate(p,d)/2:0}
+function weekDates(start){return Array.from({length:7},(_,i)=>addDays(start,i))}
+function weekBase(p,start){return weekDates(start).reduce((a,d)=>a+amount(p,d),0)}
+function adj(p,start){return data.adjust[p.id+'_'+key(start)]||{bonus:0,discount:0,obs:''}}
+function finalAmount(p,start){let a=adj(p,start);return weekBase(p,start)+(Number(a.bonus)||0)-(Number(a.discount)||0)}
+function render(){renderToday();renderPeople();renderClosing();renderHolidays();renderHistory()}
+function renderToday(){document.getElementById('dateTitle').textContent=names[selectedDate.getDay()]+' '+fmt(selectedDate);document.getElementById('weekTitle').textContent='Semana '+fmt(monday(selectedDate))+' a '+fmt(addDays(monday(selectedDate),6));document.getElementById('subtitle').textContent='Registro diário';let el=document.getElementById('dailyList');el.innerHTML=data.people.map(p=>{let s=getRec(p.id,selectedDate),label=s==='full'?'Integral':s==='half'?'Meio período':'Não trabalhou';return `<div class="person"><div><span class="name">${esc(p.name)}</span><span class="status">${label}</span></div><button onclick="cycle('${p.id}')">${label}</button></div>`}).join('')}
+function cycle(id){let s=getRec(id,selectedDate);setRec(id,selectedDate,s==='off'?'half':s==='half'?'full':'off')}
+function renderPeople(){document.getElementById('peopleList').innerHTML=data.people.map(p=>`<div class="person"><div><span class="name">${esc(p.name)}</span><div class="muted">${p.rate150?'R$ 150 todos os dias':'R$ 120 seg-sex / R$ 150 sáb-dom-feriados'}</div></div><div class="row"><button class="secondary" onclick="editPerson('${p.id}')">Editar</button><button class="danger" onclick="removePerson('${p.id}')">Excluir</button></div></div>`).join('')}
+function renderClosing(){let start=closingDate;document.getElementById('closingWeek').textContent=fmt(start)+' a '+fmt(addDays(start,6));let list=document.getElementById('closingList');list.innerHTML=data.people.map(p=>`<div class="person" onclick="editAdjustment('${p.id}')"><div class="name">${esc(p.name)}</div><div class="amount">${money(finalAmount(p,start))}</div></div>`).join('')||'<div class="muted">Nenhum freelancer cadastrado.</div>';document.getElementById('grandTotal').textContent=money(data.people.reduce((t,p)=>t+finalAmount(p,start),0))}
+function renderHolidays(){document.getElementById('holidayList').innerHTML=Object.entries(data.holidays).sort().map(([d,n])=>`<div class="person"><div><b>${fmt(new Date(d+'T12:00:00'))}</b><div class="muted">${esc(n)}</div></div><button class="danger" onclick="delHoliday('${d}')">Excluir</button></div>`).join('')}
+function renderHistory(){let weeks=new Set();Object.keys(data.adjust).forEach(k=>weeks.add(k.split('_').slice(1).join('_')));Object.keys(data.records).forEach(k=>weeks.add(key(monday(new Date(k.split('_').slice(1).join('_')+'T12:00:00')))));let arr=[...weeks].filter(Boolean).sort().reverse().slice(0,20);document.getElementById('historyList').innerHTML=arr.map(d=>`<div class="person"><span>${fmt(new Date(d+'T12:00:00'))} a ${fmt(addDays(new Date(d+'T12:00:00'),6))}</span><button class="secondary" onclick="closingDate=new Date('${d}T12:00:00');showTab('closing',document.querySelectorAll('.nav')[1])">Abrir</button></div>`).join('')||'<div class="muted">Ainda não há semanas anteriores.</div>'}
+function addPerson(){let n=prompt('Nome do freelancer:');if(!n||!n.trim())return;let c=prompt('Forma de pagamento:\\n1 - R$ 120 seg-sex / R$ 150 sáb-dom-feriados\\n2 - R$ 150 todos os dias','1');if(c!=='1'&&c!=='2')return;data.people.push({id:'p'+Date.now(),name:n.trim(),rate150:c==='2'});save();render()}
+function editPerson(id){let p=data.people.find(x=>x.id===id);if(!p)return;let n=prompt('Nome do freelancer:',p.name);if(n===null)return;let c=prompt('Forma de pagamento:\\n1 - R$ 120 seg-sex / R$ 150 sáb-dom-feriados\\n2 - R$ 150 todos os dias',p.rate150?'2':'1');if(c!=='1'&&c!=='2')return;p.name=n.trim()||p.name;p.rate150=c==='2';save();render()}
+function removePerson(id){let p=data.people.find(x=>x.id===id);if(!p)return;if(!confirm('Excluir freelancer?\\n\\nTem certeza que deseja excluir '+p.name+'?'))return;data.people=data.people.filter(x=>x.id!==id);Object.keys(data.records).forEach(k=>{if(k.startsWith(id+'_'))delete data.records[k]});Object.keys(data.adjust).forEach(k=>{if(k.startsWith(id+'_'))delete data.adjust[k]});save();render()}
+function editAdjustment(id){let p=data.people.find(x=>x.id===id),a=adj(p,closingDate);modalState={type:'adjust',id};document.getElementById('modalTitle').textContent=p.name;document.getElementById('modalBody').innerHTML=`<div class="field"><label>Valor da semana</label><input disabled value="${money(weekBase(p,closingDate))}"></div><div class="field"><label>Bônus (+)</label><input id="mBonus" type="number" step="0.01" value="${a.bonus||0}"></div><div class="field"><label>Desconto (-)</label><input id="mDiscount" type="number" step="0.01" value="${a.discount||0}"></div><div class="field"><label>Observações</label><textarea id="mObs" rows="4">${esc(a.obs||'')}</textarea></div>`;document.getElementById('modal').classList.add('open')}
+function saveModal(){if(!modalState)return;if(modalState.type==='adjust'){data.adjust[modalState.id+'_'+key(closingDate)]={bonus:Number(document.getElementById('mBonus').value)||0,discount:Number(document.getElementById('mDiscount').value)||0,obs:document.getElementById('mObs').value};save();closeModal();renderClosing()}else if(modalState.type==='holiday'){let d=document.getElementById('mDate').value,n=document.getElementById('mName').value.trim();if(d&&n)data.holidays[d]=n;save();closeModal();renderHolidays()}}
+function addHoliday(){modalState={type:'holiday'};document.getElementById('modalTitle').textContent='Adicionar feriado';document.getElementById('modalBody').innerHTML='<div class="field"><label>Data</label><input id="mDate" type="date"></div><div class="field"><label>Nome</label><input id="mName"></div>';document.getElementById('modal').classList.add('open')}
+function delHoliday(d){if(confirm('Excluir este feriado?')){delete data.holidays[d];save();renderHolidays()}}
+function closeModal(){document.getElementById('modal').classList.remove('open');modalState=null}
+function shiftDay(n){selectedDate=addDays(selectedDate,n);renderToday()}
+function shiftWeek(n){closingDate=addDays(closingDate,n);renderClosing()}
+function showTab(id,btn){['today','closing','peopleTab','holidays','history'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==id));document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active')}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 render();
-</script></body></html>
+</script>
+</body>
+</html>
